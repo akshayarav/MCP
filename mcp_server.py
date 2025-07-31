@@ -13,7 +13,11 @@ from mcp.types import (
     Implementation,
     ServerCapabilities,
     JSONRPCError,
-    ErrorData
+    ErrorData,
+    PromptsCapability,
+    ResourcesCapability,
+    ToolsCapability,
+    LoggingCapability
 )
 
 
@@ -38,11 +42,15 @@ class MCPServer:
         # Server info that will be sent to client
         self.server_info = Implementation(
             name=self.server_name,
-            version=self.server_version
+            version=self.server_version,
         )
         
         self.capabilities = ServerCapabilities(
-            tools=None 
+            experimental={},
+            logging=LoggingCapability(),
+            prompts=PromptsCapability(listChanged=False),
+            resources=ResourcesCapability(listChanged=False, subscribe=False),
+            tools=ToolsCapability(listChanged=False),
         )
     
     def handle_initialize(self, request: InitializeRequest) -> InitializeResult:
@@ -185,7 +193,7 @@ def main():
     """
     server = MCPServer(
         server_name="Barebones MCP Server",
-        server_version="1.0.0"
+        server_version="1.12.2"
     )
     
     print("Starting MCP Server...", file=sys.stderr)
