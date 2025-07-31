@@ -46,7 +46,7 @@ try:
         if cmd == "quit":
             break
         elif cmd == "init":
-            send("initialize", {"protocolVersion": "2024-11-05", "capabilities": {}}, 1)
+            send("initialize", {"protocolVersion": "2024-11-05", "capabilities": {}, "clientInfo": {"name": "Interactive Client", "version": "1"}}, 1)
         elif cmd == "initialized":
             send("notifications/initialized")
         elif cmd == "unknown":
