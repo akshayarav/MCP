@@ -178,36 +178,3 @@ echo '{"jsonrpc":"2.0","method":"tools/call","params":{"name":"read_file","argum
 python examples/test_huggingface.py
 python examples/test_openai.py
 ```
-
-## 🔐 Security Considerations
-
-- **Path Restrictions**: Only allow file access within specified directories
-- **File Size Limits**: Prevent reading of extremely large files
-- **Input Validation**: Sanitize all tool parameters
-- **Command Execution**: Disabled by default, whitelist approach when enabled
-
-## 🤝 Contributing
-
-1. Follow the official MCP specification
-2. Add tests for new tools
-3. Update documentation
-4. Ensure compatibility across different model providers
-
-## 📚 Resources
-
-- [Official MCP Specification](https://spec.modelcontextprotocol.io/)
-- [MCP Python SDK](https://github.com/modelcontextprotocol/python-sdk)
-- [JSON-RPC 2.0 Specification](https://www.jsonrpc.org/specification)
-
-## 🎓 Learning Outcomes
-
-By building this project, you'll understand:
-- How MCP protocol works under the hood
-- JSON-RPC communication patterns
-- Building model-agnostic AI tool interfaces
-- Security considerations for AI tool access
-- Integrating with various AI model providers
-
----
-
-**Next Steps**: Start with `mcp_server.py` implementing basic file reading, then expand to multiple tools and model integrations!
