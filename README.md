@@ -135,6 +135,16 @@ python mcp_server.py \
 
 ## Testing
 
+### Run with MCP Inspector
+```bash
+# Install MCP Inspector globally
+npm install -g @modelcontextprotocol/inspector
+# Run the MCP server with Inspector
+npx @modelcontextprotocol/inspector \
+  /{path_to_MCP_projecct}/mcp-venv/bin/python \
+  /{path_to_MCP_projecct}/src/mcp_server.py
+```
+
 ### Unit Tests
 ```bash
 python -m __tests__.main

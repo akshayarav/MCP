@@ -150,11 +150,14 @@ class MCPServer:
                 init_request = InitializeRequest(method="initialize", params=params)
 
                 result = self.handle_initialize(init_request)
+                serialized = result.model_dump(
+                    exclude_none=True,
+                )
 
                 return {
                     "jsonrpc": "2.0",
                     "id": request_id,
-                    "result": result.model_dump(),
+                    "result": serialized,
                 }
 
             elif method == "notifications/initialized":
@@ -163,19 +166,25 @@ class MCPServer:
 
             elif method == "tools/list":
                 tools = self.handle_list_tools()
+                serialized = tools.model_dump(
+                    exclude_none=True,
+                )
                 return {
                     "jsonrpc": "2.0",
                     "id": request_id,
-                    "result": tools.model_dump(),
+                    "result": serialized,
                 }
 
             elif method == "tools/call":
                 call_request = CallToolRequest(method="tools/call", params=params)
                 result = self.handle_call_tool(call_request)
+                serialized = result.model_dump(
+                    exclude_none=True,
+                )
                 return {
                     "jsonrpc": "2.0",
                     "id": request_id,
-                    "result": result.model_dump(),
+                    "result": serialized,
                 }
 
             else:
@@ -237,7 +246,7 @@ def main():
     """
     server = MCPServer(server_name="Barebones MCP Server", server_version="1.12.2")
 
-    print("Starting MCP Server...", file=sys.stderr)
+    logging.info("Starting MCP Server...")
     server.run()
 
 
