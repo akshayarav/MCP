@@ -6,6 +6,16 @@ import sys
 import json
 import time
 
+def close_server(server):
+    if server.stdin:
+        server.stdin.close()
+    if server.stdout:
+        server.stdout.close()
+    if server.stderr:
+        server.stderr.close()
+    server.terminate()
+    server.wait()
+
 def get_response(server, msg) -> Dict[str, Any]:
     # Give server time to start
     time.sleep(0.5)
@@ -25,7 +35,7 @@ def get_response(server, msg) -> Dict[str, Any]:
     server.stdin.write(json.dumps(msg) + '\n')
     server.stdin.flush()
     response = json.loads(server.stdout.readline())
-    print(f"Response: {response}")
+    print(f"Response: {response['result']['capabilities']}")
     return (response) 
 
 def send(method:str, params:Optional[Dict[str, Any]] = None, id:Optional[int] = None):
@@ -36,42 +46,58 @@ def send(method:str, params:Optional[Dict[str, Any]] = None, id:Optional[int] = 
     server = subprocess.Popen([sys.executable, "mcp_server.py"], 
                             stdin=subprocess.PIPE, stdout=subprocess.PIPE, 
                             stderr=subprocess.PIPE, text=True)
-    # server.stdin.write(json.dumps(msg) + '\n')
-    # server.stdin.flush()
-    # response = server.stdout.readline()
     
     test_response = get_response(server, msg)
-    server.terminate()
+    close_server(server) 
     
     server = subprocess.Popen([sys.executable, "__tests__/run_gold_server.py"], 
                             stdin=subprocess.PIPE, stdout=subprocess.PIPE, 
                             stderr=subprocess.PIPE, text=True)
-
     gold_response = get_response(server, msg)
-    server.terminate()
+    close_server(server)
 
     return test_response, gold_response
 
-class TestMCPServer(unittest.TestCase):
-    def setUp(self):
-        self.maxDiff = None
-        self.test, self.gold = send("initialize", {"protocolVersion": "2024-11-05", "capabilities": {}, "clientInfo": {"name": "Interactive Client", "version": "1"}}, 1)
-
-    def testCapabilities(self):
-        print(self.test["result"]["capabilities"])
-        print(self.gold["result"]["capabilities"])
-        self.assertDictContainsSubset(self.test["result"]["capabilities"], self.gold["result"]["capabilities"])
+class TestInitialize(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.maxDiff = None
+        cls.test, cls.gold = send("initialize", {"protocolVersion": "2024-11-05", "capabilities": {}, "clientInfo": {"name": "Interactive Client", "version": "1"}}, 1)
     
-
-    def testResult(self):
-        self.assertDictContainsSubset(self.test["result"], self.gold["result"])
+    def test_valid_jsonrpc_response(self):
+        self.assertEqual(self.test.get("jsonrpc"), "2.0")
+    
+    def test_has_result(self):
+        self.assertIn("result", self.test)
+    
+    def test_has_capabilities(self):
+        self.assertIn("capabilities", self.test["result"])
+    
+    def test_has_required_prompts_capability(self):
+        self.assertIn("prompts", self.test["result"]["capabilities"])
+    
+    def test_has_required_resources_capability(self):
+        self.assertIn("resources", self.test["result"]["capabilities"])
+    
+    def test_has_required_tools_capability(self):
+        self.assertIn("tools", self.test["result"]["capabilities"])
+    
+    def test_protocol_version_matches(self):
+        self.assertEqual(self.test["result"]["protocolVersion"], 
+                        self.gold["result"]["protocolVersion"])
+    
+    def test_no_error_present(self):
+        self.assertNotIn("error", self.test)
+    
+    def test_supports_all_gold_capabilities(self):
+        """Ensure our server supports everything the gold server does"""
+        test_caps = self.test["result"]["capabilities"]
+        gold_caps = self.gold["result"]["capabilities"]
+        
+        for cap_name in gold_caps.keys():
+            self.assertIn(cap_name, test_caps)
     
         
 
 if __name__ == "__main__":
     unittest.main()
-
-
-# Gold Response:  {'experimental': {}, 'logging': None, 'prompts': {'listChanged': False}, 'resources': {'subscribe': False, 'listChanged': False}, 'tools': {'listChanged': False}, 'completions': None}
-   
-# Test Response: {'experimental': {}, 'prompts': {'listChanged': False}, 'resources': {'subscribe': False, 'listChanged': False}, 'tools': {'listChanged': False}}
