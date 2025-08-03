@@ -19,7 +19,9 @@ from mcp.types import (
     ToolsCapability,
     LoggingCapability,
     ListToolsResult,
-    Tool,
+    CallToolRequest,
+    CallToolResult,
+    TextContent,
 )
 from tools import Greeting
 import logging
@@ -95,6 +97,40 @@ class MCPServer:
 
         return ListToolsResult(tools=tools)
 
+    def handle_call_tool(self, request: CallToolRequest) -> CallToolResult:
+        """
+        Handle a tool call request
+
+        Args:
+            request: CallToolRequest containing tool name and arguments
+
+        Returns:
+            Result of the tool call
+        """
+        name = request.params.name
+        arguments = request.params.arguments
+
+        if name == "greeting":
+            tool = Greeting()
+            try:
+                response = tool.call(arguments)
+                return CallToolResult(
+                    content=[TextContent(type="text", text=response["message"])]
+                )
+            except ValueError as e:
+                logging.error(f"Error calling tool '{name}': {str(e)}\n")
+                return CallToolResult(
+                    content=[TextContent(type="text", text=str(e))],
+                    isError=True,
+                )
+        else:
+            return CallToolResult(
+                content=[
+                    TextContent(type="text", text=str(f"Tool '{name}' not found"))
+                ],
+                isError=True,
+            )
+
     def handle_request(self, raw_request: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """
         Main request handler - routes JSON-RPC requests to appropriate methods
@@ -131,6 +167,15 @@ class MCPServer:
                     "jsonrpc": "2.0",
                     "id": request_id,
                     "result": tools.model_dump(),
+                }
+
+            elif method == "tools/call":
+                call_request = CallToolRequest(method="tools/call", params=params)
+                result = self.handle_call_tool(call_request)
+                return {
+                    "jsonrpc": "2.0",
+                    "id": request_id,
+                    "result": result.model_dump(),
                 }
 
             else:

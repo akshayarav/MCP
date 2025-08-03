@@ -147,5 +147,51 @@ class TestToolList(unittest.TestCase):
         )  # Assuming your Greeting tool is named "greeting"
 
 
+class TestToolCall(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        # Use a consistent test name across all tests
+        cls.test_name = "TestUser"
+        cls.test, cls.gold = send(
+            "tools/call",
+            {"name": "greeting", "arguments": {"name": cls.test_name}},
+            3,
+        )
+
+    def test_valid_jsonrpc_response(self):
+        self.assertEqual(self.test.get("jsonrpc"), "2.0")
+
+    def test_has_result(self):
+        self.assertIn("result", self.test)
+
+    def test_has_content(self):
+        self.assertIn("content", self.test["result"])
+
+    def test_content_is_list(self):
+        self.assertIsInstance(self.test["result"]["content"], list)
+
+    def test_content_not_empty(self):
+        self.assertTrue(len(self.test["result"]["content"]) > 0)
+
+    def test_content_has_text_type(self):
+        content = self.test["result"]["content"][0]
+        self.assertEqual(content.get("type"), "text")
+
+    def test_content_has_text_field(self):
+        content = self.test["result"]["content"][0]
+        self.assertIn("text", content)
+
+    def test_greeting_contains_name(self):
+        content = self.test["result"]["content"][0]
+        message = content.get("text", "")
+        self.assertIn(self.test_name, message)
+
+    def test_greeting_format_correct(self):
+        content = self.test["result"]["content"][0]
+        message = content.get("text", "")
+        expected = f"Hello from the MCP Server {self.test_name}!"
+        self.assertEqual(message, expected)
+
+
 if __name__ == "__main__":
     unittest.main()

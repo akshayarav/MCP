@@ -6,6 +6,8 @@ from mcp.types import (
     Tool,
 )
 
+from typing import Dict, Any, Optional
+
 
 class MCPTool:
     """
@@ -66,7 +68,7 @@ class Greeting(MCPTool):
             input_schema=input_schema,
         )
 
-    def call(self, arguments: dict) -> dict:
+    def call(self, arguments: Optional[Dict[str, Any]]) -> Dict[str, str]:
         """
         Returns a greeting message.
 
@@ -76,4 +78,6 @@ class Greeting(MCPTool):
         Returns:
             Dictionary with a greeting message
         """
+        if not arguments or "name" not in arguments:
+            raise ValueError("Missing 'name' argument in tool call")
         return {"message": f"Hello from the MCP Server {arguments['name']}!"}
