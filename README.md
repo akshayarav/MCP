@@ -74,9 +74,10 @@ Add the following configuration to ` vim claude_desktop_config.json `:
 }
 ```
 
-##### Ex:
+##### Demo:
 
-[Screen Recording 2025-08-03 at 12.42.35 AM.zip](https://github.com/user-attachments/files/21564626/Screen.Recording.2025-08-03.at.12.42.35.AM.zip)
+
+https://github.com/user-attachments/assets/d7e21bb3-bc6d-4b9b-8b7d-ed90f7f004fd
 
 
 ## Available Tools
