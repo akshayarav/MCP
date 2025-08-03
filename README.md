@@ -1,6 +1,8 @@
 # Universal MCP Server
 
-A model-agnostic Model Context Protocol (MCP) server implementation developed **from scratch**. When I say scratch I literally mean, that the JSON-RPC, STDIO, and server to client connection is written by hand! This is not a simple implementation that uses the ``` @mcp.tool ``` functionality you see online. This project was created to help me understand the MCP protocol and was carefully modeled after the [official MCP server specification](https://modelcontextprotocol.io/specification/2025-06-18).
+A model-agnostic Model Context Protocol (MCP) server implementation developed **from scratch**. When I say scratch I literally mean, that the JSON-RPC, STDIO, and server to client connection is written by hand! This is not a simple implementation that uses the ``` @mcp.tool ``` functionality you see online. 
+
+This project was created to help me understand the MCP protocol and was carefully modeled after the [official MCP server specification](https://modelcontextprotocol.io/specification/2025-06-18).
 
 ## Project Goals
 
