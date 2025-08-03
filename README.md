@@ -58,7 +58,7 @@ python3 src/mcp_server.py
 For Claude Desktop, create or edit the config file:
 - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`    
-Add the following configuration to ` vim claude_desktop_config.json `: 
+Add the following configuration to ` claude_desktop_config.json `: 
 
 ```json
 {
