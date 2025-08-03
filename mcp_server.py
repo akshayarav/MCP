@@ -66,13 +66,10 @@ class MCPServer:
         Returns:
             Initialize result with our server info and capabilities
         """
-        # Store client info for reference
         self.client_info = request.params.clientInfo if request.params else None
         
-        # Mark as initialized
         self.initialized = True
         
-        # Return our server capabilities and info
         return InitializeResult(
             protocolVersion=self.protocol_version,
             capabilities=self.capabilities,

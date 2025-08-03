@@ -1,38 +1,15 @@
 # Universal MCP Server
 
-A model-agnostic Model Context Protocol (MCP) server implementation that works with any compatible AI model or client, not just Claude Desktop.
+A model-agnostic Model Context Protocol (MCP) server implementation that works with any compatible AI model or client, not just Claude Desktop. This project was created to help me understand the MCP protocol and is modeled after the [official MCP server specification](https://modelcontextprotocol.io/specification/2025-06-18).
 
-## 🎯 Project Goals
+## Project Goals
 
 - **Universal Compatibility**: Works with any model that supports MCP (Claude, local models via Hugging Face, OpenAI, etc.)
 - **Simple Architecture**: Clean, from-scratch implementation following official MCP specification
 - **Extensible Tools**: Easy to add new tools and capabilities
 - **Learning-Focused**: Well-documented code to understand MCP internals
 
-## 📋 Project Scope
-
-### Phase 1: Core MCP Server
-- [x] JSON-RPC 2.0 over stdio communication
-- [x] Basic MCP protocol methods (`initialize`, `tools/list`, `tools/call`)
-- [x] File reading tool for specified directories
-- [ ] Error handling and validation
-- [ ] Configuration via command line/config file
-
-### Phase 2: Tool Expansion
-- [ ] File writing capabilities
-- [ ] Directory listing and navigation
-- [ ] Text processing tools (search, replace, etc.)
-- [ ] System information tools
-- [ ] Custom tool plugin system
-
-### Phase 3: Multi-Model Client
-- [ ] Generic MCP client library
-- [ ] Hugging Face model integration
-- [ ] OpenAI API integration
-- [ ] Local model support (Ollama, etc.)
-- [ ] Web interface for testing
-
-## 🏗️ Architecture
+## Architecture
 
 ```
 ┌─────────────────┐    JSON-RPC     ┌─────────────────┐
@@ -49,7 +26,7 @@ A model-agnostic Model Context Protocol (MCP) server implementation that works w
                                     └─────────────────┘
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Running the MCP Server
 
@@ -94,7 +71,7 @@ response = model("Can you read the file data/example.txt?")
 tool_result = mcp_client.call_tool("read_file", {"path": "data/example.txt"})
 ```
 
-## 🛠️ Available Tools
+## Available Tools
 
 ### File Operations
 - **`read_file`**: Read contents of a file within allowed paths
@@ -106,7 +83,7 @@ tool_result = mcp_client.call_tool("read_file", {"path": "data/example.txt"})
 - **`search_files`**: Search for text within files
 - **`execute_command`**: Run system commands (with safety restrictions)
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 universal-mcp-server/
@@ -126,7 +103,7 @@ universal-mcp-server/
 └── README.md
 ```
 
-## 🔧 Configuration
+## Configuration
 
 ### Server Configuration (`config/server_config.yaml`)
 ```yaml
@@ -156,20 +133,11 @@ python mcp_server.py \
   --log-level INFO
 ```
 
-## 🧪 Testing
+## Testing
 
 ### Unit Tests
 ```bash
-python -m pytest tests/
-```
-
-### Manual Testing
-```bash
-# Test tool listing
-echo '{"jsonrpc":"2.0","method":"tools/list","id":1}' | python mcp_server.py
-
-# Test file reading
-echo '{"jsonrpc":"2.0","method":"tools/call","params":{"name":"read_file","arguments":{"path":"data/test.txt"}},"id":2}' | python mcp_server.py
+python -m __tests__.main
 ```
 
 ### Integration Tests
