@@ -19,6 +19,7 @@ from mcp.types import (
     ToolsCapability,
     LoggingCapability
 )
+import logging
 
 
 class MCPServer:
@@ -77,13 +78,7 @@ class MCPServer:
         )
     
     def handle_notifications_initialized(self) -> None:
-        """
-        Handle the initialized notification from client
-        
-        This is sent after successful initialize to confirm the session is ready.
-        No response needed - it's a notification.
-        """
-        print("Server fully initialized and ready!", file=sys.stderr)
+        logging.info("Server fully initialized and ready!")
     
     def handle_request(self, raw_request: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """
@@ -156,13 +151,10 @@ class MCPServer:
                     continue
                 
                 try:
-                    # Parse JSON-RPC request
                     request = json.loads(line)
                     
-                    # Handle request
                     response = self.handle_request(request)
                     
-                    # Send response (if not a notification)
                     if response is not None:
                         print(json.dumps(response))
                         sys.stdout.flush()
@@ -177,7 +169,7 @@ class MCPServer:
                             message=f"Error parsing stdin: {e}"
                         )
                     )
-                    print(json.dumps(error_response))
+                    logging.error(json.dumps(error_response))
                     sys.stdout.flush()
         
         except KeyboardInterrupt:
