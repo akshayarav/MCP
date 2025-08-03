@@ -81,3 +81,89 @@ class Greeting(MCPTool):
         if not arguments or "name" not in arguments:
             raise ValueError("Missing 'name' argument in tool call")
         return {"message": f"Hello from the MCP Server {arguments['name']}!"}
+
+
+class ReadFileTool(MCPTool):
+    """
+    A tool that reads the contents of a file.
+    """
+
+    def __init__(self):
+        input_schema = {
+            "type": "object",
+            "properties": {
+                "file_path": {"type": "string", "description": "Path to the file"}
+            },
+            "required": ["file_path"],
+        }
+        super().__init__(
+            name="read_file",
+            title="Read File Tool",
+            description="Reads the contents of a specified file.",
+            input_schema=input_schema,
+        )
+
+    def call(self, arguments: Optional[Dict[str, Any]]) -> Dict[str, str]:
+        """
+        Reads the contents of a file.
+
+        Args:
+            arguments: Dictionary containing the file path
+
+        Returns:
+            Dictionary with the file contents
+        """
+        if not arguments or "file_path" not in arguments:
+            raise ValueError("Missing 'file_path' argument in tool call")
+
+        file_path = arguments["file_path"]
+        try:
+            with open(file_path, "r") as file:
+                content = file.read()
+            return {"content": content}
+        except Exception as e:
+            raise ValueError(f"Error reading file '{file_path}': {str(e)}")
+
+
+class WriteFileTool(MCPTool):
+    """
+    A tool that writes content to a file.
+    """
+
+    def __init__(self):
+        input_schema = {
+            "type": "object",
+            "properties": {
+                "file_path": {"type": "string", "description": "Path to the file"},
+                "content": {"type": "string", "description": "Content to write"},
+            },
+            "required": ["file_path", "content"],
+        }
+        super().__init__(
+            name="write_file",
+            title="Write File Tool",
+            description="Writes content to a specified file.",
+            input_schema=input_schema,
+        )
+
+    def call(self, arguments: Optional[Dict[str, Any]]) -> Dict[str, str]:
+        """
+        Writes content to a file.
+
+        Args:
+            arguments: Dictionary containing the file path and content
+
+        Returns:
+            Dictionary with a success message
+        """
+        if not arguments or "file_path" not in arguments or "content" not in arguments:
+            raise ValueError("Missing 'file_path' or 'content' argument in tool call")
+
+        file_path = arguments["file_path"]
+        content = arguments["content"]
+        try:
+            with open(file_path, "w") as file:
+                file.write(content)
+            return {"message": f"Content written to {file_path}"}
+        except Exception as e:
+            raise ValueError(f"Error writing to file '{file_path}': {str(e)}")

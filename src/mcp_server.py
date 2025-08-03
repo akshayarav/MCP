@@ -23,7 +23,7 @@ from mcp.types import (
     CallToolResult,
     TextContent,
 )
-from tools import Greeting
+from tools import Greeting, ReadFileTool, WriteFileTool
 import logging
 
 
@@ -93,7 +93,11 @@ class MCPServer:
         Returns:
             ListToolsResult containing all registered tools
         """
-        tools = [Greeting().to_tool()]
+        tools = [
+            Greeting().to_tool(),
+            ReadFileTool().to_tool(),
+            WriteFileTool().to_tool(),
+        ]
 
         return ListToolsResult(tools=tools)
 
@@ -112,6 +116,32 @@ class MCPServer:
 
         if name == "greeting":
             tool = Greeting()
+            try:
+                response = tool.call(arguments)
+                return CallToolResult(
+                    content=[TextContent(type="text", text=response["message"])]
+                )
+            except ValueError as e:
+                logging.error(f"Error calling tool '{name}': {str(e)}\n")
+                return CallToolResult(
+                    content=[TextContent(type="text", text=str(e))],
+                    isError=True,
+                )
+        elif name == "read_file":
+            tool = ReadFileTool()
+            try:
+                response = tool.call(arguments)
+                return CallToolResult(
+                    content=[TextContent(type="text", text=response["content"])]
+                )
+            except ValueError as e:
+                logging.error(f"Error calling tool '{name}': {str(e)}\n")
+                return CallToolResult(
+                    content=[TextContent(type="text", text=str(e))],
+                    isError=True,
+                )
+        elif name == "write_file":
+            tool = WriteFileTool()
             try:
                 response = tool.call(arguments)
                 return CallToolResult(
