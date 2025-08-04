@@ -23,7 +23,7 @@ from mcp.types import (
     CallToolResult,
     TextContent,
 )
-from tools import Greeting, ReadFileTool, WriteFileTool, ListDirectoryTool
+from tools import Greeting, ReadFileTool, WriteFileTool, CreateDirectoryTool, ListDirectoryTool
 import logging
 
 
@@ -97,6 +97,7 @@ class MCPServer:
             Greeting().to_tool(),
             ReadFileTool().to_tool(),
             WriteFileTool().to_tool(),
+            CreateDirectoryTool().to_tool(),
             ListDirectoryTool().to_tool(),
         ]
 
@@ -143,6 +144,19 @@ class MCPServer:
                 )
         elif name == "write_file":
             tool = WriteFileTool()
+            try:
+                response = tool.call(arguments)
+                return CallToolResult(
+                    content=[TextContent(type="text", text=response["message"])]
+                )
+            except ValueError as e:
+                logging.error(f"Error calling tool '{name}': {str(e)}\n")
+                return CallToolResult(
+                    content=[TextContent(type="text", text=str(e))],
+                    isError=True,
+                )
+        elif name == "create_directory":
+            tool = CreateDirectoryTool()
             try:
                 response = tool.call(arguments)
                 return CallToolResult(

@@ -173,6 +173,60 @@ class WriteFileTool(MCPTool):
             raise ValueError(f"Error writing to file '{file_path}': {str(e)}")
 
 
+class CreateDirectoryTool(MCPTool):
+    """
+    A tool that creates a directory.
+    """
+
+    def __init__(self):
+        input_schema = {
+            "type": "object",
+            "properties": {
+                "directory_path": {"type": "string", "description": "Path to the directory to create"},
+                "parents": {"type": "boolean", "description": "Create parent directories if they don't exist", "default": True}
+            },
+            "required": ["directory_path"],
+        }
+        super().__init__(
+            name="create_directory",
+            title="Create Directory Tool",
+            description="Creates a directory at the specified path.",
+            input_schema=input_schema,
+        )
+
+    def call(self, arguments: Optional[Dict[str, Any]]) -> Dict[str, str]:
+        """
+        Creates a directory.
+
+        Args:
+            arguments: Dictionary containing the directory path and optional parents flag
+
+        Returns:
+            Dictionary with a success message
+        """
+        if not arguments or "directory_path" not in arguments:
+            raise ValueError("Missing 'directory_path' argument in tool call")
+
+        directory_path = arguments["directory_path"]
+        parents = arguments.get("parents", True)
+        
+        try:
+            if os.path.exists(directory_path):
+                if os.path.isdir(directory_path):
+                    return {"message": f"Directory '{directory_path}' already exists"}
+                else:
+                    raise ValueError(f"'{directory_path}' exists but is not a directory")
+            
+            if parents:
+                os.makedirs(directory_path, exist_ok=True)
+            else:
+                os.mkdir(directory_path)
+            
+            return {"message": f"Directory created at {directory_path}"}
+        except Exception as e:
+            raise ValueError(f"Error creating directory '{directory_path}': {str(e)}")
+
+
 class ListDirectoryTool(MCPTool):
     """
     A tool that lists files in a directory, filtering out unnecessary files.

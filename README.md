@@ -87,6 +87,7 @@ https://github.com/user-attachments/assets/d7e21bb3-bc6d-4b9b-8b7d-ed90f7f004fd
 - **`read_file`**: Read contents of a file within allowed paths
 - **`write_file`**: Write content to files
 - **`list_directory`**: List files and folders in a directory
+- **`create_directory`**: Create a new directory
 
 ## Testing
 
