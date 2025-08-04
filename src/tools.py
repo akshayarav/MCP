@@ -6,6 +6,7 @@ from mcp.types import (
     Tool,
 )
 
+import os
 from typing import Dict, Any, Optional
 
 
@@ -135,7 +136,10 @@ class WriteFileTool(MCPTool):
             "type": "object",
             "properties": {
                 "file_path": {"type": "string", "description": "Path to the file"},
-                "content": {"type": "string", "description": "Content to write"},
+                "content": {
+                    "type": "string",
+                    "description": "Content to write. When writing code, the content should only use comments when necessary. The code should be as concise as possible and follow the standards already present in the file. Avoid writing new helper functions over using alreadt existing implementations. Again, avoid comments and the code ideally should document itself.",
+                },
             },
             "required": ["file_path", "content"],
         }
@@ -167,3 +171,85 @@ class WriteFileTool(MCPTool):
             return {"message": f"Content written to {file_path}"}
         except Exception as e:
             raise ValueError(f"Error writing to file '{file_path}': {str(e)}")
+
+
+class ListDirectoryTool(MCPTool):
+    """
+    A tool that lists files in a directory, filtering out unnecessary files.
+    """
+
+    def __init__(self):
+        input_schema = {
+            "type": "object",
+            "properties": {
+                "directory_path": {"type": "string", "description": "Path to the directory"}
+            },
+            "required": ["directory_path"],
+        }
+        super().__init__(
+            name="list_directory",
+            title="List Directory Tool",
+            description="Lists all relevant files in a directory, filtering out cache and system files.",
+            input_schema=input_schema,
+        )
+
+    def call(self, arguments: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+        """
+        Lists files in a directory, filtering out unnecessary files.
+
+        Args:
+            arguments: Dictionary containing the directory path
+
+        Returns:
+            Dictionary with lists of files and directories
+        """
+        if not arguments or "directory_path" not in arguments:
+            raise ValueError("Missing 'directory_path' argument in tool call")
+
+        directory_path = arguments["directory_path"]
+        
+        if not os.path.exists(directory_path):
+            raise ValueError(f"Directory '{directory_path}' does not exist")
+        
+        if not os.path.isdir(directory_path):
+            raise ValueError(f"'{directory_path}' is not a directory")
+
+        skip_patterns = {
+            '__pycache__', '.git', '.svn', '.hg', '.bzr', 'node_modules',
+            '.vscode', '.idea', '.DS_Store', 'Thumbs.db', '.pytest_cache',
+            '.coverage', '.tox', '.mypy_cache', '.env', 'venv', 'env',
+            '.venv', 'build', 'dist', '*.egg-info', '.cache'
+        }
+        
+        skip_extensions = {'.pyc', '.pyo', '.pyd', '.so', '.dll', '.log', '.tmp', '.swp', '.bak'}
+
+        try:
+            all_items = os.listdir(directory_path)
+            files = []
+            directories = []
+            
+            for item in all_items:
+                if item.startswith('.') and item not in {'.gitignore', '.env.example', '.dockerignore'}:
+                    continue
+                if item in skip_patterns:
+                    continue
+                if any(item.endswith(ext) for ext in skip_extensions):
+                    continue
+                if any(pattern.replace('*', '') in item for pattern in skip_patterns if '*' in pattern):
+                    continue
+                
+                item_path = os.path.join(directory_path, item)
+                if os.path.isfile(item_path):
+                    files.append(item)
+                elif os.path.isdir(item_path):
+                    directories.append(item)
+            
+            return {
+                "directory": directory_path,
+                "files": sorted(files),
+                "directories": sorted(directories),
+                "total_files": len(files),
+                "total_directories": len(directories)
+            }
+        except Exception as e:
+            raise ValueError(f"Error listing directory '{directory_path}': {str(e)}")

@@ -23,7 +23,7 @@ from mcp.types import (
     CallToolResult,
     TextContent,
 )
-from tools import Greeting, ReadFileTool, WriteFileTool
+from tools import Greeting, ReadFileTool, WriteFileTool, ListDirectoryTool
 import logging
 
 
@@ -97,6 +97,7 @@ class MCPServer:
             Greeting().to_tool(),
             ReadFileTool().to_tool(),
             WriteFileTool().to_tool(),
+            ListDirectoryTool().to_tool(),
         ]
 
         return ListToolsResult(tools=tools)
@@ -146,6 +147,26 @@ class MCPServer:
                 response = tool.call(arguments)
                 return CallToolResult(
                     content=[TextContent(type="text", text=response["message"])]
+                )
+            except ValueError as e:
+                logging.error(f"Error calling tool '{name}': {str(e)}\n")
+                return CallToolResult(
+                    content=[TextContent(type="text", text=str(e))],
+                    isError=True,
+                )
+        elif name == "list_directory":
+            tool = ListDirectoryTool()
+            try:
+                response = tool.call(arguments)
+                formatted_response = f"Directory: {response['directory']}\n\n"
+                formatted_response += f"Files ({response['total_files']}):\n"
+                for file in response['files']:
+                    formatted_response += f"  {file}\n"
+                formatted_response += f"\nDirectories ({response['total_directories']}):\n"
+                for directory in response['directories']:
+                    formatted_response += f"  {directory}/\n"
+                return CallToolResult(
+                    content=[TextContent(type="text", text=formatted_response)]
                 )
             except ValueError as e:
                 logging.error(f"Error calling tool '{name}': {str(e)}\n")
